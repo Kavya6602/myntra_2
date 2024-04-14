@@ -1,7 +1,7 @@
 import express from 'express';
 import { router as productRouter } from './product';
 import { router as userRouter } from './user';
-import wishlist from './wishlist.js';
+import { router as wishlistRouter} from './wishlist.js';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -10,6 +10,6 @@ app.use(bodyParser.json())
 
 app.use('/',productRouter);
 app.use('/',userRouter);
-app.use('/',wishlist);
+app.use('/',wishlistRouter);
 
 app.listen(3001, ()=>{ console.log('Server is running') })

@@ -13,7 +13,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
             return;
         }
         const query = `SELECT * FROM get_product_by_id($1)`;
-        const products = await (db as any).any(query, [id]);
+        const products = await db.any(query, [id]);
         if (products.length === 0) {
             res.status(404).send({ error: "Product not found" });
             return;
@@ -33,7 +33,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
 
         const query = `select get_all_products($1, $2, $3, $4, $5)`
 
-        const products = await (db as any).any(query, [
+        const products = await db.any(query, [
             type || null,
             minPrice || null,
             maxPrice || null,

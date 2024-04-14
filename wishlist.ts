@@ -5,7 +5,7 @@ import express, { Request, Response, NextFunction } from 'express';
 const router = express.Router();
 import { logRequest,addRequestId } from './middleware';
 
-const getAllWishlist = async (req: Request, res: Response , next: NextFunction) => {
+export const getAllWishlist = async (req: Request, res: Response , next: NextFunction) => {
     try {
         const { limit, offset } = req.query;
 
@@ -14,7 +14,7 @@ const getAllWishlist = async (req: Request, res: Response , next: NextFunction) 
         }
 
         const query = 'SELECT * FROM get_all_wishlist($1, $2)';
-        const results = await (db as any).any(query, [limit || null, offset || null]);
+        const results = await db.any(query, [limit || null, offset || null]);
 
         res.status(200).send({ message: "Successful", result: results });
     } catch (e) {
@@ -24,7 +24,7 @@ const getAllWishlist = async (req: Request, res: Response , next: NextFunction) 
     next()
 }
 
-const deleteWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteWishlist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
         if (!id) {
@@ -32,7 +32,7 @@ const deleteWishlist = async (req: Request, res: Response, next: NextFunction) =
             return;
         }
         const query = `select delete_wishlist($1)`
-        const result = await (db as any).one(query, [id]);
+        const result = await db.one(query, [id]);
 
         res.status(200).send({ message: 'Deleted Successfully' });
     } catch (e) {
@@ -42,7 +42,7 @@ const deleteWishlist = async (req: Request, res: Response, next: NextFunction) =
     next()
 };
 
-const addWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const addWishlist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { user_id, product_id, is_active, quantity } = req.body;
 
@@ -51,7 +51,7 @@ const addWishlist = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         const query = `select add_wishlist($1, $2, $3, $4)`;
-       const result =  await (db as any).one(query, [user_id, product_id, is_active, quantity]);
+       const result =  await db.one(query, [user_id, product_id, is_active, quantity]);
 
         res.status(201).send({ message: "Created Successfully!",result:result });
     } catch (e) {
@@ -61,7 +61,7 @@ const addWishlist = async (req: Request, res: Response, next: NextFunction) => {
     next()
 }
 
-const updateWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const updateWishlist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { quantity } = req.body;
         const { user_id, product_id } = req.params;
@@ -72,7 +72,7 @@ const updateWishlist = async (req: Request, res: Response, next: NextFunction) =
 
         const query = `select update_wishlist($1,$2,$3)`;
 
-        const [results] = await (db as any).any(query, [user_id, product_id,quantity]);
+        const [results] = await db.any(query, [user_id, product_id,quantity]);
 
         if (results.affectedRows === 0) {
             return res.status(404).json({ message: "User or product not found in wishlist" });
@@ -93,4 +93,4 @@ router.delete('/wishlist/:id',addRequestId,logRequest, deleteWishlist);
 router.post('/wishlist',addRequestId,logRequest,addWishlist);
 router.put('/wishlist/:user_id/:product_id',addRequestId,logRequest,updateWishlist)
 
-export = router;
+export { router }
