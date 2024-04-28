@@ -27,8 +27,10 @@ const getProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
             res.status(400).send({ error: "Product ID required" });
             return;
         }
+        console.log(id);
         const query = `SELECT * FROM get_product_by_id($1)`;
         const products = yield db_1.default.any(query, [id]);
+        console.log(products.length);
         if (products.length === 0) {
             res.status(404).send({ error: "Product not found" });
             return;

@@ -1,25 +1,24 @@
-import db  from './db';
-// import pgPromise from 'pg-promise';
-// const pgp = pgPromise();
+import db from './db';
 import express, { Request, Response, NextFunction } from 'express';
 const router = express.Router();
-import { logRequest,addRequestId } from './middleware';
+import { logRequest, addRequestId } from './middleware';
 
-export const getAllWishlist = async (req: Request, res: Response , next: NextFunction) => {
+const getAllWishlist = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { limit, offset } = req.query;
-
+        console.log(limit, offset)
         if (!limit || !offset) {
             throw new Error(`Both limit and offset must be provided.`);
         }
 
         const query = 'SELECT * FROM get_all_wishlist($1, $2)';
-        const results = await db.any(query, [limit || null, offset || null]);
-
+        const results = await db.any(query, [limit, offset]);
+console.log(results.length)
         res.status(200).send({ message: "Successful", result: results });
     } catch (e) {
-        console.error(e);
-        res.status(500).send({ message: 'Internal Server Error' });
+        const error = e as Error;
+        console.error(error);
+        res.status(500).send({ message: error });
     }
     next()
 }
@@ -51,9 +50,9 @@ export const addWishlist = async (req: Request, res: Response, next: NextFunctio
         }
 
         const query = `select add_wishlist($1, $2, $3, $4)`;
-       const result =  await db.one(query, [user_id, product_id, is_active, quantity]);
+        const result = await db.one(query, [user_id, product_id, is_active, quantity]);
 
-        res.status(201).send({ message: "Created Successfully!",result:result });
+        res.status(201).send({ message: "Created Successfully!", result: result });
     } catch (e) {
         console.error(e);
         res.status(500).send({ message: "Internal Server Error" });
@@ -72,7 +71,7 @@ export const updateWishlist = async (req: Request, res: Response, next: NextFunc
 
         const query = `select update_wishlist($1,$2,$3)`;
 
-        const [results] = await db.any(query, [user_id, product_id,quantity]);
+        const [results] = await db.any(query, [user_id, product_id, quantity]);
 
         if (results.affectedRows === 0) {
             return res.status(404).json({ message: "User or product not found in wishlist" });
@@ -88,9 +87,9 @@ export const updateWishlist = async (req: Request, res: Response, next: NextFunc
 };
 
 
-router.get('/wishlist',addRequestId,logRequest,getAllWishlist);
-router.delete('/wishlist/:id',addRequestId,logRequest, deleteWishlist);
-router.post('/wishlist',addRequestId,logRequest,addWishlist);
-router.put('/wishlist/:user_id/:product_id',addRequestId,logRequest,updateWishlist)
+router.get('/wishlist', addRequestId, logRequest, getAllWishlist);
+router.delete('/wishlist/:id', addRequestId, logRequest, deleteWishlist);
+router.post('/wishlist', addRequestId, logRequest, addWishlist);
+router.put('/wishlist/:user_id/:product_id', addRequestId, logRequest, updateWishlist)
 
 export { router }

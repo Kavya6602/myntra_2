@@ -12,8 +12,10 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
             res.status(400).send({ error: "Product ID required" });
             return;
         }
+        console.log(id)
         const query = `SELECT * FROM get_product_by_id($1)`;
         const products = await db.any(query, [id]);
+        console.log(products.length)
         if (products.length === 0) {
             res.status(404).send({ error: "Product not found" });
             return;

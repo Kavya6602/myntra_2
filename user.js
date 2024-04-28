@@ -14,8 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = exports.resetPassword = exports.forgotPassword = exports.login = exports.register = exports.getUser = void 0;
 const db_1 = __importDefault(require("./db"));
-const pg_promise_1 = __importDefault(require("pg-promise"));
-const pgp = (0, pg_promise_1.default)();
+// import { QueryColumns } from 'pg-promise';
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 exports.router = router;
@@ -24,14 +23,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const middleware_1 = require("./middleware");
-// import { IClient } from 'pg-promise/typescript/pg-subset';
 const getUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { limit, offset } = req.query;
-        // Call the stored procedure
         const query = 'SELECT * FROM get_users($1, $2)';
-        const results = yield db_1.default.any(query, [limit, offset]);
-        res.status(200).send({ message: "All data returned", result: results });
+        const result = yield db_1.default.any(query, [limit, offset]);
+        res.status(200).send({ message: "All data returned", result: result });
     }
     catch (e) {
         const error = e;
@@ -44,14 +41,13 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     try {
         const { name, is_active, email, password } = req.body;
         if (!name || !is_active || !email || !password) {
-            console.log(name, is_active, email, password);
             return res.status(400).json({ message: 'Name, Active status, Email and Password are all required' });
         }
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         // Execute the function directly
-        const query = 'SELECT register_user($1, $2, $3, $4) AS result';
-        const result = yield db_1.default.any(query, [name, is_active, email, hashedPassword]);
-        res.status(201).json({ message: 'User registered successfully', result: result.result });
+        const query = 'SELECT * from register_user($1, $2, $3, $4)';
+        const result = yield db_1.default.query(query, [name, is_active, email, hashedPassword]);
+        res.status(201).json({ message: 'User registered successfully', result: result[0] });
     }
     catch (e) {
         console.error(e);
@@ -67,9 +63,8 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         if (!email || !password) {
             return res.status(400).json({ message: "Email and Password are required" });
         }
-        // Call the stored procedure
         const query = `SELECT * FROM login_user($1, $2)`;
-        const result = yield db_1.default.any(query, [email, password]);
+        const result = yield db_1.default.query(query, [email, password]);
         if (result.length === 0) {
             throw new Error('User not found');
         }
@@ -122,13 +117,10 @@ const resetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             res.status(400).send({ message: "Please provide all the details" });
             return;
         }
-        // console.log(email, otp, password)/
-        // Hash the password
         const hashedPassword = yield bcrypt_1.default.hash(password, 10);
         // Call the function
         const query = `SELECT * from reset_password($1, $2, $3)`;
         const [result] = yield db_1.default.any(query, [email, otp, hashedPassword]);
-        // console.log(result)
         res.status(200).send({ message: "Password changed successfully", result: result[0] });
     }
     catch (e) {

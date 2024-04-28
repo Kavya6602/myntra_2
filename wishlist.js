@@ -12,10 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.router = exports.updateWishlist = exports.addWishlist = exports.deleteWishlist = exports.getAllWishlist = void 0;
+exports.router = exports.updateWishlist = exports.addWishlist = exports.deleteWishlist = void 0;
 const db_1 = __importDefault(require("./db"));
-// import pgPromise from 'pg-promise';
-// const pgp = pgPromise();
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
 exports.router = router;
@@ -23,20 +21,22 @@ const middleware_1 = require("./middleware");
 const getAllWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { limit, offset } = req.query;
+        console.log(limit, offset);
         if (!limit || !offset) {
             throw new Error(`Both limit and offset must be provided.`);
         }
         const query = 'SELECT * FROM get_all_wishlist($1, $2)';
-        const results = yield db_1.default.any(query, [limit || null, offset || null]);
+        const results = yield db_1.default.any(query, [limit, offset]);
+        console.log(results.length);
         res.status(200).send({ message: "Successful", result: results });
     }
     catch (e) {
-        console.error(e);
-        res.status(500).send({ message: 'Internal Server Error' });
+        const error = e;
+        console.error(error);
+        res.status(500).send({ message: error });
     }
     next();
 });
-exports.getAllWishlist = getAllWishlist;
 const deleteWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
@@ -94,7 +94,7 @@ const updateWishlist = (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     next();
 });
 exports.updateWishlist = updateWishlist;
-router.get('/wishlist', middleware_1.addRequestId, middleware_1.logRequest, exports.getAllWishlist);
+router.get('/wishlist', middleware_1.addRequestId, middleware_1.logRequest, getAllWishlist);
 router.delete('/wishlist/:id', middleware_1.addRequestId, middleware_1.logRequest, exports.deleteWishlist);
 router.post('/wishlist', middleware_1.addRequestId, middleware_1.logRequest, exports.addWishlist);
 router.put('/wishlist/:user_id/:product_id', middleware_1.addRequestId, middleware_1.logRequest, exports.updateWishlist);

@@ -23,12 +23,11 @@
 
 // export default { db };
 
-
 import  pgPromise, { IDatabase, IMain } from 'pg-promise';
 import { IClient } from 'pg-promise/typescript/pg-subset';
 
 // Create pg-promise instance
-const pgp: IMain = pgPromise();
+const pgp:IMain = pgPromise();
 
 // Database configuration
 const dbConfig = {
@@ -53,3 +52,29 @@ db.connect()
 
 // Export the typed database object
 export default db;
+
+// import { Pool } from 'pg';
+
+// // Database configuration
+// const dbConfig = {
+//     host: 'localhost',
+//     user: 'postgres',
+//     password: 'Monterox@02',
+//     database: 'Myntra',
+//     port: 5432 
+// };
+
+// // Create a new database connection pool
+// const db = new Pool(dbConfig);
+
+// // Log database connection status
+// db.connect()
+//     .then(() => {
+//         console.log("Database connected");
+//     })
+//     .catch((error: Error) => {
+//         console.error('Error connecting to the database:', error);
+//     });
+
+// // Export the database connection pool
+// export default db;
